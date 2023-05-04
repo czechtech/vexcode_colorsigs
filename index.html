@@ -9,14 +9,20 @@
   <body>
     <h1>VEXcode Color Signature Inspector</h1>
     <p>
-      <input type="file" id="file-selector">
+      <input type="file" id="file-selector" accept=".v5blocks">
       <script>
         const fileSelector = document.getElementById('file-selector');
         fileSelector.addEventListener('change', (event) => {
-          const fileList = event.target.files;
-          console.log(fileList);
+          file = event.target.files[0];
+          p = document.createElement("p");
+
+          node = document.createTextNode(file);
+          p.appendChild(node);
+          element = document.getElementById("file");
+          element.appendChild(p);
         });
       </script>
+      <div id="file"></div>
     </p>
   </body>
 </html>
