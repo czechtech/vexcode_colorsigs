@@ -2,12 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>title</title>
+    <title>VEXcode v5blocks Color Signature Inspector</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
   </head>
   <body>
-    <h1>VEXcode Color Signature Inspector</h1>
+    <h1>VEXcode v5blocks Color Signature Inspector</h1>
     <p>
       <input type="file" id="file-selector" accept=".v5blocks">
       <script>
@@ -20,7 +20,19 @@
           p.appendChild(node);
           element = document.getElementById("file");
           element.appendChild(p);
+          
+          readV5Blocks(file);
         });
+        
+        function readV5Blocks(file) {
+          // Check if the file is an image.
+          if (file.type && !file.type.startsWith('v5blocks/')) {
+            console.log('File is not a v5blocks.', file.type, file);
+            return;
+          }
+          const reader = new FileReader();
+          reader.readAsText(file);
+        }
       </script>
       <div id="file"></div>
     </p>
