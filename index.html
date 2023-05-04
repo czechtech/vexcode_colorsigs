@@ -16,23 +16,11 @@
           file = event.target.files[0];
           p = document.createElement("p");
 
-          node = document.createTextNode(file);
+          node = document.createTextNode(await file.text());
           p.appendChild(node);
           element = document.getElementById("file");
           element.appendChild(p);
-          
-          readV5Blocks(file);
         });
-        
-        function readV5Blocks(file) {
-          // Check if the file is an image.
-          if (file.type && !file.type.startsWith('v5blocks/')) {
-            console.log('File is not a v5blocks.', file.type, file);
-            return;
-          }
-          const reader = new FileReader();
-          reader.readAsText(file);
-        }
       </script>
       <div id="file"></div>
     </p>
