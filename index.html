@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>title</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <h1>VEXcode Color Signature Inspector</h1>
+    <p>
+      <input type="file" id="file-selector">
+      <script>
+        const fileSelector = document.getElementById('file-selector');
+        fileSelector.addEventListener('change', (event) => {
+          const fileList = event.target.files;
+          console.log(fileList);
+        });
+      </script>
+    </p>
+  </body>
+</html>
