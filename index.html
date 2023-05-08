@@ -7,6 +7,7 @@
     <script src="script.js"></script>
     <script>
       // global
+      var file = null;
       var json = null;
       
 			function loadFile(e) {
@@ -20,6 +21,8 @@
 				fr.addEventListener('error', ()=>alert("Error while reading.") );
 				fr.addEventListener('abort', ()=>alert("Reading aborted.") );
 				fr.addEventListener('loadend', processFile);
+				
+				document.getElementById("file-download").disabled = false;
 			}
 			
 			function processFile(e) {
@@ -173,6 +176,22 @@
 				}
 
 			}
+			function downloadFile() {
+			    // ADAPT FOR VEX FILE RENDERING ERROR
+				  Object.keys(json["rconfig"]).forEach( (device)=> {
+				    if(json["rconfig"][device].deviceType && json["rconfig"][device].deviceType == "Vision") {
+	          	json.rconfig[device].setting.config = JSON.stringify(json.rconfig[device].setting)
+	          }
+          });
+          
+					fileContent = new Blob([JSON.stringify(json)],{type:"text/plain"});
+					
+					fileName = file.name.split(".v5blocks")[0] + " (new).v5blocks";
+					link = document.getElementById("download-a");
+					link.href = URL.createObjectURL(fileContent);
+					link.download = fileName;
+					link.click();
+			}
     </script>
   </head>
   <body>
@@ -185,7 +204,10 @@
     </div>
     <div id="rconfig"></div>
     <div if="download">
-      <!-- Save Button -->
+      <p>
+        <button id="file-download" onclick="downloadFile()" disabled="true">Download</button>
+        <a href="" visible="false" id="download-a"><!--used for downloading--></a>
+      </p>
     </div>
   </body>
 </html>
