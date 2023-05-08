@@ -1,0 +1,27 @@
+#rconfig > div , #rconfig > h2{
+  background-color: LightGray;
+  font-family: monospace;
+  border-radius: 15px;
+  padding: 15px;
+}
+
+.vision > h2 {
+  margin-top: 0px;
+}
+
+.config > p {
+  flex: 0 0 100%;
+}
+
+.config {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.config div {
+  background-color: #0099FF;
+  flex: 1;
+  margin: 5px;
+  border: solid black;
+}
