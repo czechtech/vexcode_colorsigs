@@ -5,24 +5,187 @@
     <title>VEXcode v5blocks Color Signature Inspector</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
+    <script>
+      // global
+      var json = null;
+      
+			function loadFile(e) {
+				if(!e || !e.target || !e.target.files || !e.target.files[0]) {
+					alert("No file");
+					return
+				}
+				file = e.target.files[0];
+				fr = new FileReader();
+				fr.readAsText(file);
+				fr.addEventListener('error', ()=>alert("Error while reading.") );
+				fr.addEventListener('abort', ()=>alert("Reading aborted.") );
+				fr.addEventListener('loadend', processFile);
+			}
+			
+			function processFile(e) {
+			  if(!e || !e.target || !e.target.result) {
+			    alert("Error processing file.");
+			    return;
+			  }
+				json = JSON.parse(e.target.result);
+			  if(!json["rconfig"] || json["rconfig"].length < 1) {
+			    alert("No rconfig in file.");
+			    return;
+			  }
+			  
+			  Object.keys(json["rconfig"]).forEach( (device)=> {
+					if(!json["rconfig"][device].deviceType) {
+					  h2 = document.createElement("h2");
+					  h2.appendChild(document.createTextNode("Unknown: " + json["rconfig"][device]));
+					  document.getElementById("rconfig").appendChild(h2);
+					}
+				  if(json["rconfig"][device].deviceType && json["rconfig"][device].deviceType != "Vision") {
+					  h2 = document.createElement("h2");
+					  h2.appendChild(document.createTextNode("Device: " + json["rconfig"][device].name));
+					  document.getElementById("rconfig").appendChild(h2);
+				  }
+				  if(json["rconfig"][device].deviceType && json["rconfig"][device].deviceType == "Vision") {
+					  parseVisionDevice(json["rconfig"][device]);
+					}
+			  });
+
+			}
+			
+			function parseVisionDevice(v) {
+			  deviceDiv = document.createElement("div");
+			  document.getElementById("rconfig").appendChild(deviceDiv);
+			  deviceDiv.className = "vision";
+
+				visionName = v.name;
+				if(!visionName) {
+				  configDiv.appendChild(document.createTextNode("No Vision Name Found"));
+					return;
+				}
+				
+			  deviceDiv.id = v.name;			  			  
+			  h2 = document.createElement("h2");
+			  deviceDiv.appendChild(h2);
+			  h2.appendChild(document.createTextNode("Device: " + v.name));
+			  Object.keys(v).forEach( (value)=> {
+			    if(value != "name" && value != "setting") {
+			      p = document.createElement("p");
+			      deviceDiv.appendChild(p);
+			      p.appendChild(document.createTextNode(value + ": " + v[value]));
+			    }
+			  });
+			  
+				visionSetting = v.setting;
+				if(!visionSetting) {
+				  configDiv.appendChild(document.createTextNode("No Vision Settings Found"));
+					return;
+				}
+
+        // Parse Vision Setting //
+
+				configDiv = document.createElement("div");
+				deviceDiv.appendChild(configDiv);
+				configDiv.className = "config";
+				
+				visionSettingConfig = visionSetting.config;
+				if(!visionSettingConfig) {
+					configDiv.appendChild(document.createTextNode("No Vision Setting Config Found"));
+					return;
+				}
+				config = JSON.parse(visionSettingConfig);
+				config = config.config;
+				if(!config) {
+  				configDiv.appendChild(document.createTextNode("No Config JSON within Config Found"));
+					return;
+				}
+				
+				// FIX VEX FILE RENDERING ERROR
+				v.setting.config = config;
+				
+				brightness = config.brightness;
+				if(!brightness) {
+				  configDiv.appendChild(document.createTextNode("No Brightness Setting Config Found"));
+					return;
+				}
+				
+				p = document.createElement("p");
+				p.appendChild(document.createTextNode("brightness: " + brightness));
+				/*
+				label = document.createTextNode("brightness: ");
+				textbox = document.createElement("input");
+				textbox.className = "brightness";
+				textbox.value = brightness;
+				textbox.setAttribute("type", "number"); // set this with CSS??
+				p.appendChild(label);
+				p.appendChild(textbox);
+				*/
+				configDiv.appendChild(p);
+
+        // Parse Signatures //
+        
+				signatures = config.signatures;
+				if(!signatures) {
+				  configDiv.appendChild(document.createTextNode("No Signatures Found"));
+					return;
+				}
+
+				for(i = 0; i < signatures.length; i++) {
+				  sigDiv = document.createElement("div");
+				  sigDiv.id = signatures[i].name; // The existence of name hasn't been checked AND I don't know this will be unique
+					h3 = document.createElement("h3");
+					h3.appendChild(document.createTextNode(signatures[i].name));
+					sigDiv.appendChild(h3);
+					configDiv.appendChild(sigDiv);
+					
+					// Parse Details
+
+					Object.keys(signatures[i]).forEach( (value)=> {
+						if(value != "parameters") {
+							p = document.createElement("p");
+							p.appendChild(document.createTextNode(value + ": " + signatures[i][value]));
+							sigDiv.appendChild(p);
+						} else { // value == "parameters"
+						  parameters = signatures[i]["parameters"];
+							Object.keys(parameters).forEach( (parameter)=> {
+									p = document.createElement("p");
+									label = document.createElement("p");
+									label.appendChild(document.createTextNode(parameter));
+									textbox = document.createElement("input");
+									if(isNaN(parameters[parameter])) {
+									  textbox.setAttribute("type", "text");
+									  textbox.setAttribute("disabled", true);
+									} else {
+									  textbox.setAttribute("type", "number");
+									  textbox.onchange = function (e) {
+									    t = this.previousSibling.textContent;
+									    e.currentTarget.ref[t] = int(this.value);
+									  };
+									  textbox.ref = parameters;
+									}
+									textbox.value = parameters[parameter];
+									p.appendChild(label);
+									p.appendChild(textbox);
+									sigDiv.appendChild(p);
+							});
+							
+						}
+					});
+					
+				}
+
+			}
+    </script>
   </head>
   <body>
     <h1>VEXcode v5blocks Color Signature Inspector</h1>
-    <p>
-      <input type="file" id="file-selector" accept=".v5blocks">
-      <script>
-        const fileSelector = document.getElementById('file-selector');
-        fileSelector.addEventListener('change', (event) => {
-          file = event.target.files[0];
-          p = document.createElement("p");
-
-          node = document.createTextNode(await file.text());
-          p.appendChild(node);
-          element = document.getElementById("file");
-          element.appendChild(p);
-        });
-      </script>
-      <div id="file"></div>
-    </p>
+    <div id="file">
+      <p>
+        <input type="file" id="file-selector" accept=".v5blocks">
+        <script>document.getElementById('file-selector').addEventListener('change', loadFile);</script>
+      </p>
+    </div>
+    <div id="rconfig"></div>
+    <div if="download">
+      <!-- Save Button -->
+    </div>
   </body>
 </html>
