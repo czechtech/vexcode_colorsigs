@@ -157,7 +157,7 @@
 									  textbox.setAttribute("type", "number");
 									  textbox.onchange = function (e) {
 									    t = this.previousSibling.textContent;
-									    e.currentTarget.ref[t] = int(this.value);
+									    e.currentTarget.ref[t] = Number(this.value);
 									  };
 									  textbox.ref = parameters;
 									}
