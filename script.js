@@ -13,7 +13,8 @@ function loadFile(e) {
 	fr.addEventListener('error', ()=>alert("Error while reading.") );
 	fr.addEventListener('abort', ()=>alert("Reading aborted.") );
 	fr.addEventListener('loadend', processFile);
-	
+
+	document.getElementById("rconfig").innerHTML = '';
 	document.getElementById("file-download").disabled = false;
 }
 
