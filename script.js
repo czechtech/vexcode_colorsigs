@@ -112,8 +112,8 @@ function parseVisionDevice(v) {
 	textbox.className = "brightness";
 	textbox.value = brightness;
 	textbox.setAttribute("type", "number");
-	textbox.onchange = function (e) { e.currentTarget.ref = Number(this.value); };
-	textbox.ref = config.brightness;
+	textbox.onchange = function (e) { e.currentTarget.ref["brightness"] = Number(this.value); };
+	textbox.ref = config;
 	p.appendChild(label);
 	p.appendChild(textbox);
 	configDiv.appendChild(p);
