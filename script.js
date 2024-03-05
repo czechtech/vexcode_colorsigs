@@ -98,6 +98,8 @@ function parseVisionDevice(v) {
 	// FIX VEX FILE RENDERING ERROR
 	v.setting.config = config;
 	
+	// Device Brightness //
+
 	brightness = config.brightness;
 	if(!brightness) {
 		configDiv.appendChild(document.createTextNode("No Brightness Setting Config Found"));
@@ -105,14 +107,17 @@ function parseVisionDevice(v) {
 	}
 	
 	p = document.createElement("p");
-	label = document.createTextNode("brightness: ");
+	label = document.createTextNode("brightness:");
 	textbox = document.createElement("input");
 	textbox.className = "brightness";
 	textbox.value = brightness;
-	textbox.setAttribute("type", "number"); // set this with CSS??
+	textbox.setAttribute("type", "number");
+	textbox.onchange = function (e) { e.currentTarget.ref = Number(this.value); };
+	textbox.ref = config.brightness;
 	p.appendChild(label);
 	p.appendChild(textbox);
 	configDiv.appendChild(p);
+	
 
 	// Parse Signatures //
 	
