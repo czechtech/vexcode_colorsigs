@@ -105,8 +105,6 @@ function parseVisionDevice(v) {
 	}
 	
 	p = document.createElement("p");
-	p.appendChild(document.createTextNode("brightness: " + brightness));
-	/*
 	label = document.createTextNode("brightness: ");
 	textbox = document.createElement("input");
 	textbox.className = "brightness";
@@ -114,7 +112,6 @@ function parseVisionDevice(v) {
 	textbox.setAttribute("type", "number"); // set this with CSS??
 	p.appendChild(label);
 	p.appendChild(textbox);
-	*/
 	configDiv.appendChild(p);
 
 	// Parse Signatures //
