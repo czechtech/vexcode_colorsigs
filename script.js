@@ -177,11 +177,8 @@ function parseVisionDevice(v) {
 				textbox.className = "range";
 				textbox.value = signatures[i][value];
 				textbox.setAttribute("type", "number");
-				textbox.onchange = function (e) {
-					t = this.previousSibling.textContent;
-					e.currentTarget.ref[t] = Number(this.value);
-				};
-				textbox.ref = parameters;
+				textbox.onchange = function (e) { e.currentTarget.ref["range"] = Number(this.value); };
+				textbox.ref = signatures[i];
 				p.appendChild(label);
 				p.appendChild(textbox);
 				sigDiv.appendChild(p);
