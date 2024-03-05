@@ -138,11 +138,14 @@ function parseVisionDevice(v) {
 		// Parse Details
 
 		Object.keys(signatures[i]).forEach( (value)=> {
-			if(value != "parameters") {
+			// name
+			if(value == "name") {
 				p = document.createElement("p");
-				p.appendChild(document.createTextNode(value + ": " + signatures[i][value]));
+				p.appendChild(document.createTextNode("name: " + signatures[i][value]));
 				sigDiv.appendChild(p);
-			} else { // value == "parameters"
+			}
+			// parameters
+			else if(value == "parameters") {
 				parameters = signatures[i]["parameters"];
 				Object.keys(parameters).forEach( (parameter)=> {
 						p = document.createElement("p");
@@ -165,7 +168,29 @@ function parseVisionDevice(v) {
 						p.appendChild(textbox);
 						sigDiv.appendChild(p);
 				});
-				
+			}
+			// range
+			else if(value == "range") {
+				p = document.createElement("p");
+				label = document.createTextNode("range:");
+				textbox = document.createElement("input");
+				textbox.className = "range";
+				textbox.value = signatures[i][value];
+				textbox.setAttribute("type", "number");
+				textbox.onchange = function (e) {
+					t = this.previousSibling.textContent;
+					e.currentTarget.ref[t] = Number(this.value);
+				};
+				textbox.ref = parameters;
+				p.appendChild(label);
+				p.appendChild(textbox);
+				sigDiv.appendChild(p);
+			}
+			// unexpected...
+			else {
+				p = document.createElement("p");
+				p.appendChild(document.createTextNode(value + "**: " + signatures[i][value]));
+				sigDiv.appendChild(p);
 			}
 		});
 		
