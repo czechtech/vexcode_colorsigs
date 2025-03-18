@@ -25,34 +25,42 @@ function processFile(e) {
 		return;
 	}
 	json = JSON.parse(e.target.result);
-	if(!json["rconfig"] || json["rconfig"].length < 1) {
-		alert("No rconfig in file.");
+	if(!json["robotConfig"] || json["robotConfig"].length < 1) {
+		alert("No robotConfig in file.");
 		return;
 	}
 	
-	Object.keys(json["rconfig"]).forEach( (device)=> {
-		if(!json["rconfig"][device].deviceType) {
+	Object.keys(json["robotConfig"]).forEach( (device)=> {
+		if(!json["robotConfig"][device].deviceType) {
 			h2 = document.createElement("h2");
-			h2.appendChild(document.createTextNode("Unknown: " + json["rconfig"][device]));
+			h2.appendChild(document.createTextNode("Unknown: " + json["robotConfig"][device]));
 			document.getElementById("rconfig").appendChild(h2);
 		}
-		if(json["rconfig"][device].deviceType && json["rconfig"][device].deviceType != "Vision") {
-			h2 = document.createElement("h2");
-			h2.appendChild(document.createTextNode("Device: " + json["rconfig"][device].name));
-			document.getElementById("rconfig").appendChild(h2);
-		}
-		if(json["rconfig"][device].deviceType && json["rconfig"][device].deviceType == "Vision") {
-			parseVisionDevice(json["rconfig"][device]);
+		else {
+			// VISION DEVICE
+			if(json["robotConfig"][device].deviceType == "Vision") {
+				alert("Unable to process Vision device.");
+				//parseVisionDevice(json["robotConfig"][device]);
+			}
+			// AI VISION DEVICE
+			else if(json["robotConfig"][device].deviceType == "AIVision") {
+				parseAIVisionDevice(json["robotConfig"][device]);
+			}
+			else {
+				h2 = document.createElement("h2");
+				h2.appendChild(document.createTextNode("Device: " + json["robotConfig"][device].name));
+				document.getElementById("rconfig").appendChild(h2);
+			}
 		}
 	});
 
 }
 
 
-function parseVisionDevice(v) {
+function parseAIVisionDevice(v) {
 	deviceDiv = document.createElement("div");
 	document.getElementById("rconfig").appendChild(deviceDiv);
-	deviceDiv.className = "vision";
+	deviceDiv.className = "aivision";
 
 	visionName = v.name;
 	if(!visionName) {
@@ -83,124 +91,84 @@ function parseVisionDevice(v) {
 	configDiv = document.createElement("div");
 	deviceDiv.appendChild(configDiv);
 	configDiv.className = "config";
+	configHead = document.createElement("h3");
+	configHead.appendChild(document.createTextNode("config"));
+	configDiv.appendChild(configHead);
 	
 	visionSettingConfig = visionSetting.config;
 	if(!visionSettingConfig) {
 		configDiv.appendChild(document.createTextNode("No Vision Setting Config Found"));
 		return;
 	}
-	config = JSON.parse(visionSettingConfig);
-	config = config.config;
-	if(!config) {
-		configDiv.appendChild(document.createTextNode("No Config JSON within Config Found"));
+
+	// ADAPT FOR VEX FILE STRINGIFIED AIVISION SETTING'S CONFIG
+	v.setting.config = JSON.parse(v.setting.config);
+	if(!v.setting.config) {
+		configDiv.appendChild(document.createTextNode("Error Parsing AIVision Setting Config's JSON"));
+		return;
+	}
+	visionSettingConfig = visionSetting.config;
+	
+	// Confirm Colors //
+	colors = visionSettingConfig.colors;
+	if(!colors) {
+		configDiv.appendChild(document.createTextNode("No Colors Found"));
 		return;
 	}
 	
-	// FIX VEX FILE RENDERING ERROR
-	v.setting.config = config;
-	
-	// Device Brightness //
-
-	brightness = config.brightness;
-	if(!brightness) {
-		configDiv.appendChild(document.createTextNode("No Brightness Setting Config Found"));
-		return;
-	}
-	
-	p = document.createElement("p");
-	label = document.createTextNode("brightness:");
-	textbox = document.createElement("input");
-	textbox.className = "brightness";
-	textbox.value = brightness;
-	textbox.setAttribute("type", "number");
-	textbox.onchange = function (e) { e.currentTarget.ref["brightness"] = Number(this.value); };
-	textbox.ref = config;
-	p.appendChild(label);
-	p.appendChild(textbox);
-	configDiv.appendChild(p);
-	
-
-	// Parse Signatures //
-	
-	signatures = config.signatures;
-	if(!signatures) {
-		configDiv.appendChild(document.createTextNode("No Signatures Found"));
-		return;
-	}
-
-	for(i = 0; i < signatures.length; i++) {
-		sigDiv = document.createElement("div");
-		sigDiv.id = signatures[i].name; // The existence of name hasn't been checked AND I don't know this will be unique
-		h3 = document.createElement("h3");
-		h3.appendChild(document.createTextNode(signatures[i].name));
-		sigDiv.appendChild(h3);
-		configDiv.appendChild(sigDiv);
-		
-		// Parse Details
-
-		Object.keys(signatures[i]).forEach( (value)=> {
-			// name
-			if(value == "name") {
+	Object.keys(visionSettingConfig).forEach( (key)=> {
+		// COLORS
+	  if(key == "colors") {
+			for(i = 0; i < colors.length; i++) {
+				colorDiv = document.createElement("div");
+				colorDiv.id = colors[i].name; // The existence of name hasn't been checked. This should be unique because it is a constant in the vex-generated code
+				h3 = document.createElement("h3");
+				h3.appendChild(document.createTextNode(colors[i].name));
+				colorDiv.appendChild(h3);
+				configDiv.appendChild(colorDiv);
+				// Parse Details
+				Object.keys(colors[i]).forEach( (key)=> {
+					label = document.createElement("label");
+					label.appendChild(document.createTextNode(key));
+					textbox = document.createElement("input");
+					if(isNaN(colors[i][key])) {
+						textbox.setAttribute("type", "text");
+						textbox.setAttribute("disabled", true);
+					} else {
+						textbox.setAttribute("type", "number");
+						// Changes need to be updated in the json...
+						textbox.onchange = function (e) {
+							k = this.parentNode.textContent;
+							e.currentTarget.json_ref[k] = Number(this.value);
+							if(k == 'red' || k == 'green' || k == 'blue') {
+								this.parentNode.parentNode.style.backgroundColor = `rgb(${e.currentTarget.json_ref.red}, ${e.currentTarget.json_ref.green}, ${e.currentTarget.json_ref.blue})`;
+							}
+						};
+						textbox.json_ref = visionSettingConfig.colors[i];
+					}
+					textbox.value = colors[i][key];
+					label.appendChild(textbox);
+					colorDiv.appendChild(label);
+					colorDiv.style.backgroundColor = `rgb(${colors[i].red}, ${colors[i].green}, ${colors[i].blue})`;
+				});		
+			}
+		}
+		// codes, tags, AIObjects, AIObjectModel, AIModelMetaData, aiModelDropDownValue
+		else {
 				p = document.createElement("p");
-				p.appendChild(document.createTextNode("name: " + signatures[i][value]));
-				sigDiv.appendChild(p);
-			}
-			// parameters
-			else if(value == "parameters") {
-				parameters = signatures[i]["parameters"];
-				Object.keys(parameters).forEach( (parameter)=> {
-						p = document.createElement("p");
-						label = document.createElement("p");
-						label.appendChild(document.createTextNode(parameter));
-						textbox = document.createElement("input");
-						if(isNaN(parameters[parameter])) {
-							textbox.setAttribute("type", "text");
-							textbox.setAttribute("disabled", true);
-						} else {
-							textbox.setAttribute("type", "number");
-							textbox.onchange = function (e) {
-								t = this.previousSibling.textContent;
-								e.currentTarget.ref[t] = Number(this.value);
-							};
-							textbox.ref = parameters;
-						}
-						textbox.value = parameters[parameter];
-						p.appendChild(label);
-						p.appendChild(textbox);
-						sigDiv.appendChild(p);
-				});
-			}
-			// range
-			else if(value == "range") {
-				p = document.createElement("p");
-				label = document.createTextNode("range:");
-				textbox = document.createElement("input");
-				textbox.className = "range";
-				textbox.value = signatures[i][value];
-				textbox.setAttribute("type", "number");
-				textbox.onchange = function (e) { e.currentTarget.ref["range"] = Number(this.value); };
-				textbox.ref = signatures[i];
-				p.appendChild(label);
-				p.appendChild(textbox);
-				sigDiv.appendChild(p);
-			}
-			// unexpected...
-			else {
-				p = document.createElement("p");
-				p.appendChild(document.createTextNode(value + "**: " + signatures[i][value]));
-				sigDiv.appendChild(p);
-			}
-		});
-		
-	}
+				p.appendChild(document.createTextNode(key + ": " + visionSettingConfig[key]));
+				configDiv.appendChild(p);
+		}
+	});
+	// done parsing AIVisionDevice		
 }
 
 
 function downloadFile() {
-		// ADAPT FOR VEX FILE RENDERING ERROR
-		Object.keys(json["rconfig"]).forEach( (device)=> {
-			if(json["rconfig"][device].deviceType && json["rconfig"][device].deviceType == "Vision") {
-				json.rconfig[device].setting.config = JSON.stringify(json.rconfig[device].setting)
+		// ADAPT FOR VEX FILE STRINGIFIED AIVISION SETTING'S CONFIG
+		Object.keys(json["robotConfig"]).forEach( (device)=> {
+			if(json["robotConfig"][device].deviceType && json["robotConfig"][device].deviceType == "AIVision") {
+				json.robotConfig[device].setting.config = JSON.stringify(json.robotConfig[device].setting.config)
 			}
 		});
 		
