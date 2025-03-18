@@ -1,4 +1,4 @@
-# VEXcode V5 Color Signature Modifier
+# V5Blocks Color Signature Inspector
 
 This is a rudimentary tool for modifying the Vision color signatures of VEX ```v5blocks``` files.
 
